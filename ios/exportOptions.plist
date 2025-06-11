@@ -9,11 +9,11 @@
     <key>provisioningProfiles</key>
     <dict>
         <key>com.tonentreprise.monapp</key>
-        <string>match AppStore com.tonentreprise.monapp</string>
+        <string>match AppStore com.soyabox.soyabox</string>
     </dict>
     <key>signingCertificate</key>
     <string>Apple Development</string>
     <key>teamID</key>
-    <string>VOTRE_TEAM_ID_ICI</string>
+    <string>69223904-03fa-48a9-8a84-487b5f2fb59e</string>
 </dict>
 </plist>
