@@ -7,7 +7,6 @@ platform :ios, '13.0'
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 # Ne modifie pas cette partie — elle est utilisée par Flutter
-plugin 'cocoapods-deep-lint'
 
 target 'Runner' do
   use_frameworks!
