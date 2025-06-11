@@ -8,8 +8,8 @@
     <string>manual</string>
     <key>provisioningProfiles</key>
     <dict>
-        <key>com.soyabox.soyabox</key>
-        <string>match AppStore com.soyabox.soyabox</string>
+        <key>com.tonentreprise.monapp</key>
+        <string>match AppStore com.tonentreprise.monapp</string>
     </dict>
     <key>signingCertificate</key>
     <string>Apple Development</string>
