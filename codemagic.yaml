@@ -1,23 +1,18 @@
 # codemagic.yaml
 
-name: Build and Deploy Soyabox to App Store
+name: Soyabox - iOS CI/CD
 
 workflows:
   ios-workflow:
-    name: iOS - Soyabox
-    max_build_duration: 60
-    instance_type: mac_mini
+    name: Build iOS with Firebase on Mac mini M2
+    instance_type: mac_mini # Compatible avec Mac mini M2
     environment:
       vars:
-        # Apple App Store Connect API Key Info
+        BUNDLE_ID: "com.soyabox.soyabox"
         APP_STORE_CONNECT_KEY_IDENTIFIER: YOUR_APPLE_KEY_ID
         APP_STORE_CONNECT_ISSUER_ID: YOUR_APPLE_ISSUER_ID
         APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
         CERTIFICATE_PRIVATE_KEY: $CERTIFICATE_PRIVATE_KEY
-
-        # App-specific info
-        BUNDLE_ID: "com.soyabox.soyabox"
-        APP_NAME: "Soyabox"
 
       flutter: stable
       xcode: latest
@@ -28,22 +23,35 @@ workflows:
         script: |
           git checkout "${CM_COMMIT_BRANCH}"
 
-      - name: Get Flutter packages
+      - name: Get Flutter dependencies
         script: |
           flutter pub get
 
-      - name: Build Flutter iOS release
+      - name: Set iOS deployment target in Podfile to 13.0
+        script: |
+          # Met à jour la version d'iOS ciblée dans Podfile
+          cd ios
+          sed -i '' 's/platform :ios, .*/platform :ios, "13.0"/' Podfile
+          cd ..
+
+      - name: Install pods
+        script: |
+          cd ios
+          pod install --repo-update --verbose
+          cd ..
+
+      - name: Build iOS release
         script: |
           flutter build ios --release --no-codesign
 
-      - name: Set up keychain
+      - name: Setup keychain for codesigning
         script: |
           security create-keychain -p codemagic codemagic.keychain
           security default-keychain -s codemagic.keychain
           security unlock-keychain -p codemagic codemagic.keychain
           security set-keychain-settings -t 21600 -l ~/Library/Keychains/codemagic.keychain
 
-      - name: Fetch signing files automatically
+      - name: Fetch signing files
         script: |
           cd ios
           fetch-signing-files $BUNDLE_ID $FCI_APPSTORECONNECT_API_KEY_PATH
@@ -65,10 +73,8 @@ workflows:
                      -exportPath build
 
           cd ..
-
     artifacts:
       - ios/build/*.ipa
-
     publishing:
       app_store_connect:
         api_key: $FCI_APPSTORECONNECT_API_KEY
