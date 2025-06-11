@@ -1,0 +1,19 @@
+{
+  "name": "Flutter Dev Container",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/flutter:1": {
+      "version": "3.22.x"
+    },
+    "ghcr.io/devcontainers-contrib/features/ruby:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dart-code.dart-code",
+        "dart-code.flutter"
+      ]
+    }
+  },
+  "postCreateCommand": "sudo gem install cocoapods && mkdir -p ~/bin && export PATH=~/bin:$PATH"
+}
