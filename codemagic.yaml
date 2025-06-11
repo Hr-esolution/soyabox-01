@@ -1,0 +1,76 @@
+# codemagic.yaml
+
+name: Build and Deploy Soyabox to App Store
+
+workflows:
+  ios-workflow:
+    name: iOS - Soyabox
+    max_build_duration: 60
+    instance_type: mac_pro
+    environment:
+      vars:
+        # Apple App Store Connect API Key Info
+        APP_STORE_CONNECT_KEY_IDENTIFIER: YOUR_APPLE_KEY_ID
+        APP_STORE_CONNECT_ISSUER_ID: YOUR_APPLE_ISSUER_ID
+        APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
+        CERTIFICATE_PRIVATE_KEY: $CERTIFICATE_PRIVATE_KEY
+
+        # App-specific info
+        BUNDLE_ID: "com.soyabox.soyabox"
+        APP_NAME: "Soyabox"
+
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+
+    scripts:
+      - name: Checkout code
+        script: |
+          git checkout "${CM_COMMIT_BRANCH}"
+
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Build Flutter iOS release
+        script: |
+          flutter build ios --release --no-codesign
+
+      - name: Set up keychain
+        script: |
+          security create-keychain -p codemagic codemagic.keychain
+          security default-keychain -s codemagic.keychain
+          security unlock-keychain -p codemagic codemagic.keychain
+          security set-keychain-settings -t 21600 -l ~/Library/Keychains/codemagic.keychain
+
+      - name: Fetch signing files automatically
+        script: |
+          cd ios
+          fetch-signing-files $BUNDLE_ID $FCI_APPSTORECONNECT_API_KEY_PATH
+          cd ..
+
+      - name: Archive and export IPA
+        script: |
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+                     -scheme Runner \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     archive \
+                     -archivePath build/Runner.xcarchive
+
+          xcodebuild -exportArchive \
+                     -archivePath build/Runner.xcarchive \
+                     -exportOptionsPlist exportOptions.plist \
+                     -exportPath build
+
+          cd ..
+
+    artifacts:
+      - ios/build/*.ipa
+
+    publishing:
+      app_store_connect:
+        api_key: $FCI_APPSTORECONNECT_API_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
