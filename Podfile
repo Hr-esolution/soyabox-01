@@ -1,14 +1,19 @@
-# Uncomment the next line to define a global platform for your project
+# ios/Podfile
+
+# Définit la plateforme cible (iOS 13 minimum requis pour Firebase, etc.)
 platform :ios, '13.0'
 
-# CocoaPods analytics disabled
+# Désactive les statistiques de CocoaPods
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+# Ne modifie pas cette partie — elle est utilisée par Flutter
+plugin 'cocoapods-deep-lint'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Si tu utilises Firebase ou des plugins natifs, ajoute-les ici
 end
 
 post_install do |installer|
